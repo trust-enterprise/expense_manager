@@ -6,6 +6,8 @@ from django.views.decorators.http import require_POST
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
 
 # Create your views here.
 def home(request):

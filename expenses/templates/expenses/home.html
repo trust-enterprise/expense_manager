@@ -30,7 +30,9 @@
     {% for expense in expenses %}
         <p>{{ expense.title }} - {{ expense.category }} - ₹{{ expense.amount }} - {{ expense.date }}</p>
         <a href="{% url 'edit' expense.id %}" class="btn btn-primary btn-sm"> Edit </a>| 
-        <form method='post' action="{% url 'delete' expense.id %}">
+        <form method='post' 
+        action="{% url 'delete' expense.id %}"
+        onsubmit = "return confirm('Sure to delete?')">
             {%csrf_token  %}
             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
