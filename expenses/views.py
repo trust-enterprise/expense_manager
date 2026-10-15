@@ -19,8 +19,14 @@ def home(request):
         form = ExpenseForm()
 
     query = request.GET.get('q', '')
+    category = request.GET.get('category', '')
+    
+    categories = Expense.objects.values_list('category', flat=True).distinct()
     expenses = Expense.objects.filter(title__icontains=query)
-
+    
+    if category:
+        expenses = expenses.filter(category=category)
+    
     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
     paginator = Paginator(expenses, 5)
@@ -30,8 +36,9 @@ def home(request):
     return render(request, 'expenses/home.html',
                   {
                       'form':form,
+                      'categories': categories,
                       'expenses':expenses,
-                      'total': total
+                      'total': total,
                   }
                   )
 
