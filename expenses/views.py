@@ -14,7 +14,9 @@ def home(request):
     if request.method == "POST":
         form = ExpenseForm(request.POST)
         if form.is_valid():
-            form.save()
+            expense = form.save(commit=False)
+            expense.user = request.user
+            expense.save()
             messages.success(request,'Expense added successfully')
             return redirect('home')
     else:
@@ -23,7 +25,7 @@ def home(request):
     query = request.GET.get('q', '')
     category = request.GET.get('category', '')
     
-    categories = Expense.objects.values_list('category', flat=True).distinct()
+    categories = Expense.objects.filter(user = request.user).values_list('category', flat=True).distinct()
     expenses = Expense.objects.filter(title__icontains=query)
     
     if category:
@@ -68,3 +70,15 @@ def edit_expense(request, id):
                       'form':form 
                   }
                   )
+
+def register(request):
+    if request.method=="POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+        return redirect('home')
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'expenses/register.html', {'form':form})
