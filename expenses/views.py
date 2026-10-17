@@ -8,8 +8,10 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+@login_required
 def home(request):
     if request.method == "POST":
         form = ExpenseForm(request.POST)
@@ -26,7 +28,7 @@ def home(request):
     category = request.GET.get('category', '')
     
     categories = Expense.objects.filter(user = request.user).values_list('category', flat=True).distinct()
-    expenses = Expense.objects.filter(title__icontains=query)
+    expenses = Expense.objects.filter(user = request.user, title__icontains=query)
     
     if category:
         expenses = expenses.filter(category=category)
@@ -47,14 +49,16 @@ def home(request):
                   )
 
 @require_POST
-def delete_expense(request, id):
-    expense = get_object_or_404(Expense, id = id)
+@login_required
+def delete_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id = expense_id, user = request.user)
     expense.delete()
     messages.success(request,'Expense deleted successfully')
     return redirect('home')
 
-def edit_expense(request, id):
-    expense = get_object_or_404(Expense, id = id)
+@login_required
+def edit_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id = expense_id, user = request.user)
 
     if request.method == "POST":
         form = ExpenseForm(request.POST, instance=expense)
@@ -77,7 +81,7 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-        return redirect('home')
+            return redirect('home')
     else:
         form = UserCreationForm()
 
