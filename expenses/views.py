@@ -24,14 +24,15 @@ def home(request):
     else:
         form = ExpenseForm()
 
-    query = request.GET.get('q', '')
+    query = request.GET.get('expense_name', '')
     category = request.GET.get('category', '')
     
-    categories = Expense.objects.filter(user = request.user).values_list('category', flat=True).distinct()
     expenses = Expense.objects.filter(user = request.user, title__icontains=query)
     
     if category:
         expenses = expenses.filter(category=category)
+    
+    categories = Expense.objects.filter(user = request.user).values_list('category', flat=True).distinct()
     
     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
